@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Cards</title>
+
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px;
+            margin-bottom: 10px;
+            background-color: rgb(189, 209, 226);
+        }
+
+        #formulario {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 500px;
+            margin: 0px auto;
+        }
+
+        #form-container {
+            background-color: rgb(152, 165, 203);
+            padding: 30px;
+        }
+
+        #flashCards-container{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .card {
+            background-color: #6ad6bf;
+        }
+
+        /* #formulario:nth-child {} */
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Flash Cards para Estudo</h1>
+    </header>
+
+    <div id="form-container">
+        <form id="formulario">
+            <input type="text" id="frente" placeholder="Frente">
+            <input type="text" id="verso" placeholder="Verso">
+            <button id="confirmar" type="button">Confirmar</button>
+        </form>
+    </div>
+
+    <div id="flashCards-container">
+
+    </div>
+
+    <script>
+        const listaDeCards = JSON.parse(localStorage.getItem('listaDeCards')) || [];
+        const frente = document.getElementById('frente')
+        const verso = document.getElementById('verso')
+        const submit = document.getElementById('confirmar')
+
+        // Criando as divs com os dados do localStorage
+        listaDeCards.forEach(card => {
+            const div = document.createElement('div');
+            div.setAttribute('class', 'card');
+            
+            // item 0 de cada obj do array
+            div.textContent = card.frente;
+
+            document.getElementById('flashCards-container').appendChild(div);
+        });
+
+        // Registrando um flash card
+        submit.onclick = function (e) {
+            const div = document.createElement('div');
+
+            div.setAttribute('class', 'card');
+
+            div.textContent = frente.value;
+
+            document.getElementById('flashCards-container').appendChild(div);
+
+            const obj = { 'frente': frente.value, 'verso': verso.value };
+            listaDeCards.push(obj);
+
+            localStorage.setItem('listaDeCards', JSON.stringify(listaDeCards));
+
+            document.querySelector('#formulario').reset();
+        }
+
+    </script>
+</body>
+
+</html>
