@@ -32,13 +32,16 @@
             padding: 30px;
         }
 
-        #flashCards-container{
+        #flashCards-container {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 33% 34% 33%;
         }
 
         .card {
             background-color: #6ad6bf;
+            height: 100px;
+            border: 2px solid black;
+            text-align: center;
         }
 
         /* #formulario:nth-child {} */
@@ -53,7 +56,7 @@
 
     <div id="form-container">
         <form id="formulario">
-            <input type="text" id="frente" placeholder="Frente">
+            <input type="text" id="frente" class="teste" placeholder="Frente">
             <input type="text" id="verso" placeholder="Verso">
             <button id="confirmar" type="button">Confirmar</button>
         </form>
@@ -64,39 +67,101 @@
     </div>
 
     <script>
+        // Necessário impedir registro vazio
         const listaDeCards = JSON.parse(localStorage.getItem('listaDeCards')) || [];
         const frente = document.getElementById('frente')
         const verso = document.getElementById('verso')
         const submit = document.getElementById('confirmar')
 
+        const inputFrente = document.getElementById('frente')
+        const inputVerso = document.getElementById('verso')
+
+        let lengthDaLista = listaDeCards.length
+        let i = lengthDaLista
+
         // Criando as divs com os dados do localStorage
         listaDeCards.forEach(card => {
             const div = document.createElement('div');
             div.setAttribute('class', 'card');
-            
+            div.setAttribute('lado', 'frente');
+            div.setAttribute('index', `${listaDeCards.indexOf(card)}`)
             // item 0 de cada obj do array
             div.textContent = card.frente;
 
             document.getElementById('flashCards-container').appendChild(div);
         });
 
+
+        // Funcionalidade de virar os cards ue já estão na memória
+        const card = document.querySelectorAll('.card')
+        card.forEach(div => {
+            div.addEventListener('click', () => {
+                if (div.getAttribute('lado') == 'frente') {
+                    div.style.backgroundColor = 'red';
+                    // div.textContent = 'Verso';
+                    div.textContent = listaDeCards[div.getAttribute('index')].verso;
+                    div.setAttribute('lado', 'verso');
+                } else if (div.getAttribute('lado') == 'verso') {
+                    div.style.backgroundColor = 'green';
+                    div.textContent = listaDeCards[div.getAttribute('index')].frente;
+                    div.setAttribute('lado', 'frente');
+                }
+            })
+        })
+
+
         // Registrando um flash card
         submit.onclick = function (e) {
-            const div = document.createElement('div');
+            if ((inputFrente.value == "")) {
+                inputFrente.focus()
+            } else if ((inputVerso.value == "")) {
+                inputVerso.focus()
+            } else {
 
-            div.setAttribute('class', 'card');
 
-            div.textContent = frente.value;
+                const div = document.createElement('div');
 
-            document.getElementById('flashCards-container').appendChild(div);
+                div.setAttribute('class', 'card');
+                div.setAttribute('lado', 'frente');
+                div.textContent = frente.value;
 
-            const obj = { 'frente': frente.value, 'verso': verso.value };
-            listaDeCards.push(obj);
+                // adicionando o event listener
+                div.addEventListener('click', () => {
+                    // teste
 
-            localStorage.setItem('listaDeCards', JSON.stringify(listaDeCards));
+                    if (div.getAttribute('lado') == 'frente') {
+                        div.style.backgroundColor = 'red';
+                        div.textContent = listaDeCards[div.getAttribute('index')].verso;
+                        div.setAttribute('lado', 'verso');
+                    } else if (div.getAttribute('lado') == 'verso') {
+                        div.style.backgroundColor = 'green';
+                        div.textContent = listaDeCards[div.getAttribute('index')].frente;
+                        div.setAttribute('lado', 'frente');
+                    }
+                }
+                )
 
-            document.querySelector('#formulario').reset();
+                document.getElementById('flashCards-container').appendChild(div);
+
+                const obj = { 'frente': frente.value, 'verso': verso.value };
+                listaDeCards.push(obj);
+
+                localStorage.setItem('listaDeCards', JSON.stringify(listaDeCards));
+
+                const listaIndice = JSON.parse(localStorage.getItem('listaDeCards'))
+
+                div.setAttribute('index', `${listaIndice.length - 1}` || '0')
+                // i += 1
+
+                document.querySelector('#formulario').reset();
+
+            }
         }
+        // Erro: este trecho é lido no inicio mas não afeta 
+        // as divs criadas com createElement!
+
+
+
 
     </script>
 </body>
