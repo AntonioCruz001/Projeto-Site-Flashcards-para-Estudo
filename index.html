@@ -33,14 +33,23 @@
         }
 
         #flashCards-container {
+            box-sizing: border-box;
+            margin: 20px 1px;
             display: grid;
-            grid-template-columns: 33% 34% 33%;
+            grid-template-columns: 33% 33% 33%;
+            gap: .8% .4%;
+            /* width: 100vw; */
         }
 
         .card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
             background-color: #6ad6bf;
-            height: 100px;
-            border: 2px solid black;
+            height: 140px;
+            /* border: 2px solid black; */
+            border-radius: 10px;
             text-align: center;
         }
 
@@ -72,6 +81,8 @@
         const frente = document.getElementById('frente')
         const verso = document.getElementById('verso')
         const submit = document.getElementById('confirmar')
+        const flashCardContainer = document.getElementById('flashCards-container')
+
 
         const inputFrente = document.getElementById('frente')
         const inputVerso = document.getElementById('verso')
@@ -86,13 +97,19 @@
             div.setAttribute('lado', 'frente');
             div.setAttribute('index', `${listaDeCards.indexOf(card)}`)
             // item 0 de cada obj do array
-            div.textContent = card.frente;
+            // div.textContent = card.frente;
 
-            document.getElementById('flashCards-container').appendChild(div);
+            const paragrafo = document.createElement('p');
+            paragrafo.setAttribute('class', 'texto-card');
+            paragrafo.textContent = card.frente;
+
+            flashCardContainer.appendChild(div);
+            div.appendChild(paragrafo);
         });
 
 
         // Funcionalidade de virar os cards ue já estão na memória
+        // getAttribute retorna o valor do atributo
         const card = document.querySelectorAll('.card')
         card.forEach(div => {
             div.addEventListener('click', () => {
@@ -118,12 +135,15 @@
                 inputVerso.focus()
             } else {
 
-
                 const div = document.createElement('div');
 
                 div.setAttribute('class', 'card');
                 div.setAttribute('lado', 'frente');
-                div.textContent = frente.value;
+                // div.textContent = frente.value;
+
+                const paragrafo = document.createElement('p');
+                paragrafo.setAttribute('class', 'texto-card');
+                paragrafo.textContent = frente.value;
 
                 // adicionando o event listener
                 div.addEventListener('click', () => {
@@ -141,7 +161,10 @@
                 }
                 )
 
-                document.getElementById('flashCards-container').appendChild(div);
+                // document.getElementById('flashCards-container').appendChild(div);
+
+                flashCardContainer.appendChild(div);
+                div.appendChild(paragrafo);
 
                 const obj = { 'frente': frente.value, 'verso': verso.value };
                 listaDeCards.push(obj);
