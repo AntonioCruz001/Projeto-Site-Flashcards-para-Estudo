@@ -8,6 +8,9 @@
 
     <style>
         * {
+            /* Procurar como fazer var em CSS!! */
+            --bgc-div-frente: #6ad6bf;
+            --bgc-div-verso: #eab276;
             margin: 0px;
             padding: 0px;
         }
@@ -19,6 +22,15 @@
             background-color: rgb(189, 209, 226);
         }
 
+        #form-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 25px;
+            background-color: rgb(152, 165, 203);
+            padding: 30px;
+        }
+
         #formulario {
             display: flex;
             flex-direction: column;
@@ -27,9 +39,36 @@
             margin: 0px auto;
         }
 
-        #form-container {
-            background-color: rgb(152, 165, 203);
-            padding: 30px;
+        #config-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            /* gap: 20px; */
+            /* width: 500px; */
+        }
+
+        #apagar {
+            padding: 5px;
+            color: rgb(255, 237, 122);
+            background-color: rgb(234, 126, 37);
+            /* border: none; */
+            border: 2px solid salmon;
+            border-radius: 8px;
+
+            transition: background-color .3s ease-in-out, color .3s ease-in-out;
+        }
+
+        #apagar:hover {
+            color: rgb(3, 52, 83);
+            background-color: rgb(241, 182, 54);
+            transition: background-color .3s ease-in-out, color .3s ease-in-out;
+        }
+
+
+        #apagar:active {
+            color: rgb(14, 91, 132);
+            background-color: rgb(253, 231, 122);
+            transition: background-color .0s ease-in-out, color .0s ease-in-out;
         }
 
         #flashCards-container {
@@ -46,11 +85,14 @@
             justify-content: center;
             align-items: center;
             box-sizing: border-box;
-            background-color: #6ad6bf;
+            background-color: var(--bgc-div-frente);
             height: 140px;
+
             /* border: 2px solid black; */
             border-radius: 10px;
             text-align: center;
+
+            user-select: none;
         }
 
         /* #formulario:nth-child {} */
@@ -69,11 +111,21 @@
             <input type="text" id="verso" placeholder="Verso">
             <button id="confirmar" type="button">Confirmar</button>
         </form>
+        <div id="config-container">
+            <button id="apagar" type="button">Apagar todos os cards</button>
+        </div>
     </div>
 
     <div id="flashCards-container">
 
     </div>
+
+
+
+
+
+
+
 
     <script>
         // Necessário impedir registro vazio
@@ -81,7 +133,9 @@
         const frente = document.getElementById('frente')
         const verso = document.getElementById('verso')
         const submit = document.getElementById('confirmar')
+        const apagar = document.getElementById('apagar')
         const flashCardContainer = document.getElementById('flashCards-container')
+        const cards = document.querySelectorAll('.card')
 
 
         const inputFrente = document.getElementById('frente')
@@ -114,12 +168,12 @@
         card.forEach(div => {
             div.addEventListener('click', () => {
                 if (div.getAttribute('lado') == 'frente') {
-                    div.style.backgroundColor = 'red';
+                    div.style.backgroundColor = 'var(--bgc-div-verso)';
                     // div.textContent = 'Verso';
                     div.textContent = listaDeCards[div.getAttribute('index')].verso;
                     div.setAttribute('lado', 'verso');
                 } else if (div.getAttribute('lado') == 'verso') {
-                    div.style.backgroundColor = 'green';
+                    div.style.backgroundColor = 'var(--bgc-div-frente)';
                     div.textContent = listaDeCards[div.getAttribute('index')].frente;
                     div.setAttribute('lado', 'frente');
                 }
@@ -150,11 +204,11 @@
                     // teste
 
                     if (div.getAttribute('lado') == 'frente') {
-                        div.style.backgroundColor = 'red';
+                        div.style.backgroundColor = 'var(--bgc-div-verso)';
                         div.textContent = listaDeCards[div.getAttribute('index')].verso;
                         div.setAttribute('lado', 'verso');
                     } else if (div.getAttribute('lado') == 'verso') {
-                        div.style.backgroundColor = 'green';
+                        div.style.backgroundColor = 'var(--bgc-div-frente)';
                         div.textContent = listaDeCards[div.getAttribute('index')].frente;
                         div.setAttribute('lado', 'frente');
                     }
@@ -185,6 +239,13 @@
 
 
 
+        // apagarLocalStorage()
+        apagar.onclick = function apagarLocalStorage() {
+            if (confirm('Deseja apagar todos os cards?')) {
+                flashCardContainer.innerHTML = '';
+                localStorage.removeItem('listaDeCards')
+            }
+        }
 
     </script>
 </body>
