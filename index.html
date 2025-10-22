@@ -8,7 +8,6 @@
 
     <style>
         * {
-            /* Procurar como fazer var em CSS!! */
             --bgc-div-frente: #6ad6bf;
             --bgc-div-verso: #eab276;
             margin: 0px;
@@ -18,8 +17,38 @@
         header {
             text-align: center;
             padding: 30px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             background-color: rgb(189, 209, 226);
+        }
+
+
+        .nav-container {
+            background-color: rgb(189, 209, 226);
+            display: flex;
+            justify-content: center;
+        }
+
+        .paginas-nav {
+            padding: 10px 10px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            width: 500px;
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .pagina {
+            padding: 5px 20px;
+        }
+
+        button {
+            border-style: none;
+            border-radius: 3px;
+        }
+
+        [data-page-active] {
+            background-color: yellow;
         }
 
         #form-container {
@@ -43,15 +72,12 @@
             display: flex;
             flex-direction: row;
             justify-content: center;
-            /* gap: 20px; */
-            /* width: 500px; */
         }
 
         #apagar {
             padding: 5px;
             color: rgb(255, 237, 122);
             background-color: rgb(234, 126, 37);
-            /* border: none; */
             border: 2px solid salmon;
             border-radius: 8px;
 
@@ -77,7 +103,6 @@
             display: grid;
             grid-template-columns: 33% 33% 33%;
             gap: .8% .4%;
-            /* width: 100vw; */
         }
 
         .card {
@@ -87,9 +112,8 @@
             box-sizing: border-box;
             background-color: var(--bgc-div-frente);
             height: 140px;
-            overflow-y: scroll;
+            overflow-y: auto;
 
-            /* border: 2px solid black; */
             border-radius: 10px;
             text-align: center;
             /* Para impedir selecao seleção selection */
@@ -102,7 +126,14 @@
             max-height: 100%;
             margin: 0;
             padding: 0 8px;
-            word-break: break-all;
+            word-break: keep-all;
+        }
+
+        @media (max-width:1000px) {
+            #flashCards-container {
+                grid-template-columns: 50% 50%;
+                gap: .8% .4%;
+            }
         }
 
         @media (max-width:600px) {
@@ -115,21 +146,30 @@
                 width: 300px;
             }
         }
-
-        /* #formulario:nth-child {} */
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>Flash Cards para Estudo</h1>
-    </header>
+    <div>
+        <header>
+            <h1>Flash Cards para Estudo</h1>
+        </header>
+
+        <div class="nav-container">
+            <nav class="paginas-nav">
+                <button class="pagina" data-page="1" data-page-active="">SUS</button>
+                <button class="pagina" data-page="2">ACS</button>
+                <button class="pagina" data-page="3">Port</button>
+                <button class="pagina" data-page="4">Lógica</button>
+            </nav>
+        </div>
+    </div>
 
     <div id="form-container">
         <form id="formulario">
             <input type="text" id="frente" class="teste" placeholder="Frente">
-            <input type="text" id="verso" placeholder="Verso">
+            <textarea name="verso" id="verso" cols="30" rows="4" placeholder="Verso"></textarea>
             <button id="confirmar" type="button">Confirmar</button>
         </form>
         <div id="config-container">
@@ -143,65 +183,152 @@
 
 
 
-
-
-
-
-
     <script>
-        // Necessário impedir registro vazio
-        let listaDeCards = JSON.parse(localStorage.getItem('listaDeCards')) || [];
-        const frente = document.getElementById('frente')
-        const verso = document.getElementById('verso')
+        // NOMES dos storages:
+        // página atual = paginaAtualFlashCard
+        // lista de cards = listaDeCardsFlashCard
+
+        // Página atual inicial no storage
+        const paginaAtualInicio = document.querySelector('[data-page-active]').getAttribute('data-page')
+        localStorage.setItem('paginaAtualFlashCard', JSON.stringify(paginaAtualInicio))
+
+        // Vaiáveis Iniciais
+        const frente = document.querySelectorAll('[lado="frente"]')
+        const verso = document.querySelectorAll('[lado="verso"]')
         const submit = document.getElementById('confirmar')
         const apagar = document.getElementById('apagar')
         const flashCardContainer = document.getElementById('flashCards-container')
-        const cards = document.querySelectorAll('.card')
-
-
         const inputFrente = document.getElementById('frente')
         const inputVerso = document.getElementById('verso')
 
-        let lengthDaLista = listaDeCards.length
-        let i = lengthDaLista
+        function recupDoStorage(storage) {
+            switch (storage) {
+                case 'listaDeCardsFlashCard':
+                    // precisa ser "let"!
+                    // cards precisa ser um array!!!!
+                    let listaDeCards = JSON.parse(localStorage.getItem('listaDeCardsFlashCard')) || [{
+                        page1: { cards: [] },
+                        page2: { cards: [] },
+                        page3: { cards: [] },
+                        page4: { cards: [] },
+                    }];
+                    return listaDeCards
+                    break;
 
+                case 'paginaAtualFlashCard':
+                    let paginaAtual = JSON.parse(localStorage.getItem('paginaAtualFlashCard')) || document.querySelector('[data-page-active]').getAttribute('data-page')
+                    return paginaAtual
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // Função que cria elementos dos cards
+        function criarElementoCard(elemento, conteudo) {
+            switch (elemento) {
+                case 'div':
+                    const elem = document.createElement(elemento)
+
+                    elem.setAttribute('class', 'card');
+                    elem.setAttribute('lado', 'frente');
+
+                    return elem
+                    break;
+
+                case 'pre':
+                    const pre = document.createElement(elemento)
+                    pre.setAttribute('class', 'texto-card');
+                    pre.innerHTML = conteudo
+
+                    return pre
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // Função de criação
         // Criando as divs com os dados do localStorage
-        listaDeCards.forEach(card => {
-            const div = document.createElement('div');
-            div.setAttribute('class', 'card');
-            div.setAttribute('lado', 'frente');
-            div.setAttribute('index', `${listaDeCards.indexOf(card)}`)
-            // item 0 de cada obj do array
-            // div.textContent = card.frente;
+        function buildUp() {
+            let listaDeCards = recupDoStorage('listaDeCardsFlashCard')
+            const paginaAtual = recupDoStorage('paginaAtualFlashCard')
+            let page = `page${paginaAtual}`
+            let arrayCards = listaDeCards[0][page].cards
 
-            const paragrafo = document.createElement('p');
-            paragrafo.setAttribute('class', 'texto-card');
-            paragrafo.textContent = card.frente;
+            if (listaDeCards) {
+                if (arrayCards != "") {
+                    for (const card in arrayCards) { // card não é um objeto aqui!
 
-            flashCardContainer.appendChild(div);
-            div.appendChild(paragrafo);
-        });
+                        //console.log('arrayCards:',arrayCards);
 
+                        let div = criarElementoCard('div')
+                        div.setAttribute('index', `${card}`)
 
-        // Funcionalidade de virar os cards que já estão na memória
-        // getAttribute retorna o valor do atributo
-        const card = document.querySelectorAll('.card')
-        card.forEach(div => {
-            div.addEventListener('click', () => {
-                if (div.getAttribute('lado') == 'frente') {
-                    div.style.backgroundColor = 'var(--bgc-div-verso)';
-                    const p = document.createElement('p')
-                    p.textContent = listaDeCards[div.getAttribute('index')].verso;
-                    p.setAttribute('class', 'texto-card');
-                    div.innerHTML = p.outerHTML
-                    div.setAttribute('lado', 'verso');
-                } else if (div.getAttribute('lado') == 'verso') {
-                    div.style.backgroundColor = 'var(--bgc-div-frente)';
-                    const p = document.createElement('p')
-                    p.setAttribute('class', 'texto-card');
-                    p.textContent = listaDeCards[div.getAttribute('index')].frente;
-                    div.innerHTML = p.outerHTML
-                    div.setAttribute('lado', 'frente');
+                        const p = criarElementoCard('pre', arrayCards[card].frente)
+
+                        flashCardContainer.appendChild(div);
+                        div.innerHTML = p.outerHTML
+                    }
+                }
+
+                // Funcionalidade de virar os cards que já estão na memória
+                // getAttribute retorna o valor do atributo
+                const card = document.querySelectorAll('.card')
+                card.forEach(div => {
+                    div.addEventListener('click', () => {
+                        if (div.getAttribute('lado') == 'frente') {
+
+                            div.style.backgroundColor = 'var(--bgc-div-verso)';
+
+                            const p = div.firstChild
+                            p.innerHTML = arrayCards[div.getAttribute('index')].verso;
+
+                            div.setAttribute('lado', 'verso');
+                            div.innerHTML = p.outerHTML
+
+                        } else if (div.getAttribute('lado') == 'verso') {
+
+                            div.style.backgroundColor = 'var(--bgc-div-frente)';
+
+                            const p = div.firstChild
+                            p.innerHTML = arrayCards[div.getAttribute('index')].frente;
+
+                            div.setAttribute('lado', 'frente');
+                            div.innerHTML = p.outerHTML
+                        }
+                    })
+                })
+            }
+        }
+        buildUp()
+
+        // Páginas
+        const paginas = document.querySelectorAll('.pagina')
+        paginas.forEach(page => {
+            page.addEventListener('click', () => {
+                if (!page.hasAttribute('data-page-active')) {
+
+                    // Estilo do botão de página ativo
+                    const active = document.querySelector('[data-page-active]')
+                    active.removeAttribute('data-page-active')
+
+                    // Página atual está ativa
+                    page.setAttribute('data-page-active', "")
+
+                    // pagina atual para o localStorage
+                    const paginaAtual = page.getAttribute('data-page')
+                    localStorage.setItem('paginaAtualFlashCard', JSON.stringify(paginaAtual))
+
+                    // Apagar o container para seguir p/ a próxima página
+                    if (flashCardContainer.hasChildNodes) {
+                        flashCardContainer.innerHTML = ""
+                    }
+
+                    // Criar os cards a partir da memória(storage)
+                    buildUp()
                 }
             })
         })
@@ -215,65 +342,56 @@
                 inputVerso.focus()
             } else {
 
-                const div = document.createElement('div');
+                const div = criarElementoCard('div')
+                const p = criarElementoCard('pre', inputFrente.value)
 
-                div.setAttribute('class', 'card');
-                div.setAttribute('lado', 'frente');
-                // div.textContent = frente.value;
+                flashCardContainer.appendChild(div);
+                div.innerHTML = p.outerHTML
 
-                const paragrafo = document.createElement('p');
-                paragrafo.setAttribute('class', 'texto-card');
-                paragrafo.textContent = frente.value;
+                const paginaAtual = recupDoStorage('paginaAtualFlashCard')
+                let page = `page${paginaAtual}`
+
+                const objCard = { 'frente': inputFrente.value, 'verso': inputVerso.value };
+
+                let listaDeCardsTemp = recupDoStorage('listaDeCardsFlashCard')
+                
+                // push no obj completo
+                listaDeCardsTemp[0][page].cards.push(objCard);
+                
+                // apenas array de cards
+                let arrayCards = listaDeCardsTemp[0][page].cards 
+
+                div.setAttribute('index', `${arrayCards.length - 1}` || '0')
 
                 // adicionando o event listener
                 div.addEventListener('click', () => {
-                    // teste
-
                     if (div.getAttribute('lado') == 'frente') {
                         div.style.backgroundColor = 'var(--bgc-div-verso)';
-                        div.textContent = listaDeCards[div.getAttribute('index')].verso;
+                        p.innerHTML = arrayCards[div.getAttribute('index')].verso
+
                         div.setAttribute('lado', 'verso');
+                        div.innerHTML = p.outerHTML
                     } else if (div.getAttribute('lado') == 'verso') {
                         div.style.backgroundColor = 'var(--bgc-div-frente)';
-                        div.textContent = listaDeCards[div.getAttribute('index')].frente;
+                        p.innerHTML = arrayCards[div.getAttribute('index')].frente
+
                         div.setAttribute('lado', 'frente');
+                        div.innerHTML = p.outerHTML
                     }
-                }
-                )
+                })
 
-                // document.getElementById('flashCards-container').appendChild(div);
-
-                flashCardContainer.appendChild(div);
-                div.appendChild(paragrafo);
-
-                const obj = { 'frente': frente.value, 'verso': verso.value };
-                listaDeCards.push(obj);
-
-                localStorage.setItem('listaDeCards', JSON.stringify(listaDeCards));
-
-                const listaIndice = JSON.parse(localStorage.getItem('listaDeCards'))
-
-                div.setAttribute('index', `${listaIndice.length - 1}` || '0')
-                // i += 1
-
+                localStorage.setItem('listaDeCardsFlashCard', JSON.stringify(listaDeCardsTemp));
                 document.querySelector('#formulario').reset();
-
             }
         }
-        // Erro: este trecho é lido no inicio mas não afeta 
-        // as divs criadas com createElement!
-
-
 
         // apagarLocalStorage()
         apagar.onclick = function apagarLocalStorage() {
             if (confirm('Deseja apagar todos os cards?')) {
                 flashCardContainer.innerHTML = '';
-                localStorage.removeItem('listaDeCards')
-                listaDeCards = []
+                localStorage.removeItem('listaDeCardsFlashCard')
             }
         }
-
     </script>
 </body>
 
